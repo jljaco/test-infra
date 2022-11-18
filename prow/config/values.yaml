@@ -81,12 +81,13 @@ tide:
     create: false
     name: ''
 
-githubToken:
+githubApp:
   secret:
    create: false
-  token: ''
+  appID: ''
+  privateKey: ''
 
-hmacToken:
+githubWebhookToken:
   secret:
     create: false
   hmac: ''

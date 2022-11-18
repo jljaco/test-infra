@@ -46,6 +46,7 @@ data:
         - label
         - lgtm
         - lifecycle
+        - require-matching-label
         - trigger
         - verify-owners
         - wip

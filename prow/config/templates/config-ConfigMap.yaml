@@ -148,4 +148,4 @@ data:
           - name: cgroup
             hostPath:
               path: /sys/fs/cgroup
-              type: Directory 
+              type: Directory

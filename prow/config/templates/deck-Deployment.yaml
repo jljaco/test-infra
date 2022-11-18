@@ -53,17 +53,19 @@ spec:
         image: {{ .Values.deck.image }}
         args:
         - --config-path=/etc/config/config.yaml
+        # NOTE: the newer starter-s3.yaml does not contain an arg for "job-config-path"; should it still be used?
         - --job-config-path=/etc/job-config
         - --plugin-config=/etc/plugins/plugins.yaml
         - --tide-url=http://tide/
         - --hook-url=http://hook:8888/plugin-help
-        - --github-token-path=/etc/github/token
         - --github-endpoint=http://ghproxy
         - --github-endpoint=https://api.github.com
         - --github-graphql-endpoint=http://ghproxy/graphql
         - --plugin-config=/etc/plugins/plugins.yaml
         - --s3-credentials-file=/etc/s3-credentials/service-account.json
         - --spyglass=true
+        - --github-app-id={{ .Values.githubApp.appId }}
+        - --github-app-private-key-path=/etc/github/cert
         ports:
           - name: http
             containerPort: 8080
@@ -100,6 +102,7 @@ spec:
       - name: config
         configMap:
           name: config
+      # NOTE: the newer starter-s3.yaml does not contain a volume for "job-config"; should it still be used?
       - name: job-config
         configMap:
           name: job-config
