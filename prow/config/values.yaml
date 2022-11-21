@@ -84,7 +84,7 @@ tide:
 githubApp:
   secret:
    create: false
-  appID: ''
+  appId: ''
   privateKey: ''
 
 githubWebhookToken:
