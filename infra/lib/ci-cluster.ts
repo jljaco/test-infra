@@ -25,7 +25,7 @@ export class CICluster extends cdk.Construct {
     super(scope, id);
 
     this.testCluster = new eks.Cluster(scope, 'TestInfraCluster', {
-      version: eks.KubernetesVersion.V1_20,
+      version: eks.KubernetesVersion.V1_21,
       defaultCapacity: 0
     })
     this.testNodegroup = this.testCluster.addNodegroupCapacity('TestInfraNodegroup', {
@@ -33,22 +33,20 @@ export class CICluster extends cdk.Construct {
       minSize: 2,
       diskSize: 150,
     })
+    let requiredNamespaces: eks.KubernetesManifest[] =
+      [PROW_NAMESPACE, PROW_JOB_NAMESPACE].map(this.createNamespace);
 
-    this.installProwRequirements(props);
-    this.installFlux();
-    this.installFluxConfiguration();
-    this.installExternalDNS();
-    this.installAWSLoadBalancer();
-  }
+    // this.installProwRequirements(props);
+    const prowSecretsChart =
+      this.testCluster.addCdk8sChart('prow-secrets',
+        new ProwSecretsChart(
+          this.cdk8sApp, 'ProwSecrets', props
+        )
+      );
+    // Ensure namespaces are created before secrets
+    prowSecretsChart.node.addDependency(...requiredNamespaces);
 
-  createNamespace = (name: string) => {
-    return this.testCluster.addCdk8sChart(`${name}-namespace-chart`,
-      new NamespaceChart(this.cdk8sApp, `${name}Namespace`, {
-        name: name
-      }));
-  }
-
-  installFlux = () => {
+    // install Flux
     const fluxChart = this.testCluster.addHelmChart('flux2', {
       chart: 'flux2',
       repository: 'https://fluxcd-community.github.io/helm-charts',
@@ -56,33 +54,18 @@ export class CICluster extends cdk.Construct {
       createNamespace: true,
       version: '0.19.2',
       values: {},
-    })
-  }
+    });
+    fluxChart.node.addDependency(...requiredNamespaces);
 
-  installFluxConfiguration = () => {
+    // install FluxConfiguration
     const fluxConfigChart = this.testCluster.addCdk8sChart('flux-configuration',
       new FluxConfigurationChart(
         this.cdk8sApp, 'FluxConfiguration', {}
       )
     );
-  }
+    fluxConfigChart.node.addDependency(...requiredNamespaces);
 
-  installProwRequirements = (secretsProps: ProwSecretsChartProps) => {
-    let requiredNamespaces: eks.KubernetesManifest[] =
-      [PROW_NAMESPACE, PROW_JOB_NAMESPACE].map(this.createNamespace);
-
-    const prowSecretsChart =
-      this.testCluster.addCdk8sChart('prow-secrets',
-        new ProwSecretsChart(
-          this.cdk8sApp, 'ProwSecrets', secretsProps
-        )
-      );
-
-    // Ensure namespaces are created before secrets
-    prowSecretsChart.node.addDependency(...requiredNamespaces);
-  }
-
-  installExternalDNS = () => {
+    // install ExternalDNS
     const externalDNSNamespace = this.createNamespace(EXTERNAL_DNS_NAMESPACE);
 
     const externalDNSServiceAccount =
@@ -104,7 +87,7 @@ export class CICluster extends cdk.Construct {
       resources: ["*"]
     }));
 
-    const helmChart = this.testCluster.addHelmChart('external-dns', {
+    const externalDNSChart = this.testCluster.addHelmChart('external-dns', {
       chart: 'external-dns',
       repository: 'https://charts.bitnami.com/bitnami',
       namespace: EXTERNAL_DNS_NAMESPACE,
@@ -122,17 +105,16 @@ export class CICluster extends cdk.Construct {
         }
       }
     });
-    helmChart.node.addDependency(externalDNSNamespace);
-  }
+    externalDNSChart.node.addDependency(externalDNSNamespace);
 
-  installAWSLoadBalancer = () => {
+    // install AWSLoadBalancer
     const serviceAccount =
       this.testCluster.addServiceAccount('alb-service-account', {
         namespace: 'kube-system',
       });
     ALBPolicies.map(policy => serviceAccount.addToPrincipalPolicy(policy))
 
-    this.testCluster.addHelmChart('aws-load-balancer-controller', {
+    const awsLoadBalancerChart = this.testCluster.addHelmChart('aws-load-balancer-controller', {
       chart: 'aws-load-balancer-controller',
       repository: 'https://aws.github.io/eks-charts',
       namespace: 'kube-system',
@@ -145,5 +127,13 @@ export class CICluster extends cdk.Construct {
         }
       }
     });
+    awsLoadBalancerChart.node.addDependency(...requiredNamespaces);
+  }
+
+  createNamespace = (name: string) => {
+    return this.testCluster.addCdk8sChart(`${name}-namespace-chart`,
+      new NamespaceChart(this.cdk8sApp, `${name}Namespace`, {
+        name: name
+      }));
   }
 }
