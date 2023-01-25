@@ -94,9 +94,9 @@ export class CICluster extends cdk.Construct {
           spec: {
             interval: "30s",
             ref: {
-              branch: "main",
+              branch: "prow-github-app-migration-staging",
             },
-            url: "https://github.com/aws-controllers-k8s/test-infra",
+            url: "https://github.com/jljaco/test-infra",
           },
         },
         {
