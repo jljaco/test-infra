@@ -22,6 +22,7 @@ export class TestCIStack extends cdk.Stack {
     const logsBucket = new LogBucket(this, "LogBucketConstruct", {
       ...props,
       account: this.account,
+      imported: false,
     });
 
     const testCluster = new CICluster(this, "CIClusterConstruct", {
