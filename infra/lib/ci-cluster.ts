@@ -60,7 +60,6 @@ export class CICluster extends Construct {
       )
       .clusterProvider(
         new blueprints.FargateClusterProvider({
-          version: clusterVersion,
           fargateProfiles,
         })
       )
