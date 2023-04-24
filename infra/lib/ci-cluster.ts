@@ -1,5 +1,4 @@
 import { Construct, IConstruct } from "constructs";
-import { aws_eks as eks, Stack, Tags } from "aws-cdk-lib";
 import * as blueprints from "@aws-quickstart/eks-blueprints";
 import * as cdk8s from "cdk8s";
 import {
@@ -20,6 +19,7 @@ import {
   GlobalResources,
   ImportHostedZoneProvider,
 } from "@aws-quickstart/eks-blueprints";
+import { aws_eks as eks, Stack, Tags } from "aws-cdk-lib";
 
 export type CIClusterCompileTimeProps = ProwGitHubSecretsChartProps & {
   hostedZoneId: string;
@@ -37,7 +37,7 @@ export class CICluster extends Construct {
   constructor(scope: Construct, id: string, props: CIClusterProps) {
     super(scope, id);
 
-    const clusterVersion = eks.KubernetesVersion.V1_23;
+    const clusterVersion = eks.KubernetesVersion.V1_24;
 
     const karpenterTagKey = `kubernetes.io/cluster/${CLUSTER_NAME}`;
     const karpenterTagValue = "owned";
@@ -60,7 +60,8 @@ export class CICluster extends Construct {
       )
       .clusterProvider(
         new blueprints.FargateClusterProvider({
-          fargateProfiles,
+          "version":clusterVersion,
+          "fargateProfiles":fargateProfiles,
         })
       )
       .addOns(
@@ -145,9 +146,9 @@ export class CICluster extends Construct {
           spec: {
             interval: "30s",
             ref: {
-              branch: "main",
+              branch: "staging",
             },
-            url: "https://github.com/aws-controllers-k8s/test-infra",
+            url: "https://github.com/jljaco/test-infra",
           },
         },
         {
