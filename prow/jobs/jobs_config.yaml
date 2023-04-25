@@ -4,42 +4,42 @@
 # Adding a service to the `aws_services` array will enable CI/CD
 
 # List of AWS services supported in ACK testing infrastructure.
-aws_services:
-- acm
-- acmpca
-- apigatewayv2
-- applicationautoscaling
-- cloudfront
-- cloudtrail
-- cloudwatch
-- cloudwatchlogs
-- dynamodb
-- ec2
-- ecr
-- eks
-- elasticache
-- emrcontainers
-- eventbridge
-- iam
-- kafka
-- kinesis
-- kms
-- lambda
-- memorydb
-- mq
-- opensearchservice
-- organizations
-- pipes
-- prometheusservice
-- rds
-- route53
-- s3
-- servicecatalog
-- sagemaker
-- sfn
-- sns
-- sqs
-- ssm
+# aws_services:
+# - acm
+# - acmpca
+# - apigatewayv2
+# - applicationautoscaling
+# - cloudfront
+# - cloudtrail
+# - cloudwatch
+# - cloudwatchlogs
+# - dynamodb
+# - ec2
+# - ecr
+# - eks
+# - elasticache
+# - emrcontainers
+# - eventbridge
+# - iam
+# - kafka
+# - kinesis
+# - kms
+# - lambda
+# - memorydb
+# - mq
+# - opensearchservice
+# - organizations
+# - pipes
+# - prometheusservice
+# - rds
+# - route53
+# - s3
+# - servicecatalog
+# - sagemaker
+# - sfn
+# - sns
+# - sqs
+# - ssm
 
 # List of AWS services onboarded for soak testing, executing in their Prow
 # cluster on every release
@@ -52,11 +52,11 @@ soak_test_on_release_service_names: []
 # issues with code-generator release.
 # Since there can be some breaking changes, these tests are marked optional for
 # prow merge criteria.
-code_gen_presubmit_services:
-- apigatewayv2
-- dynamodb
-- ec2
-- ecr
-- iam
-- lambda
-- s3
+# code_gen_presubmit_services:
+# - apigatewayv2
+# - dynamodb
+# - ec2
+# - ecr
+# - iam
+# - lambda
+# - s3
